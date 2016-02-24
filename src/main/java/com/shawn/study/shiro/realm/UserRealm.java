@@ -11,6 +11,7 @@ import org.apache.shiro.authz.Permission;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.util.ByteSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.security.auth.login.AccountNotFoundException;
@@ -30,6 +31,24 @@ public class UserRealm extends AuthorizingRealm {
     PermissionService permissionService;
 
     /**
+     * Shiro授权认证
+     * 原理：
+     */
+    @Override
+    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
+        System.out.println("Shiro开始授权认证...");
+        String username = (String) principalCollection.getPrimaryPrincipal();
+        User user = userService.findUserByUsername(username);
+
+        SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
+        authorizationInfo.setRoles(roleService.findStringRolesByUser(user));
+        authorizationInfo.setStringPermissions(permissionService.findStringPermissionsByRoles());
+
+        return authorizationInfo;
+    }
+
+
+    /**
      * Shiro登录认证
      * 原理：1.用户提交 用户名和密码
      * 2.shiro 封装令牌
@@ -41,27 +60,21 @@ public class UserRealm extends AuthorizingRealm {
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) {
         System.out.println("Shiro开始登录认证...");
         UsernamePasswordToken token = (UsernamePasswordToken) authenticationToken;
+        String username = token.getUsername();
+        String password = new String(token.getPassword());
+        System.out.println(username + " / " + password);
         User user = userService.findUserByUsername(token.getUsername());
-        if (null == user || user.getDeleted()) {
+        if (null == user) {
             throw new UnknownAccountException();
+        }
+        /*if (null == user || user.getDeleted()) {
+
         }
         if (user.getLocked()) {
             throw new LockedAccountException();
-        }
-        return new SimpleAuthenticationInfo(user, user.getPassword().toCharArray(), getName());
-    }
-
-
-    @Override
-    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
-        String username = (String) principalCollection.getPrimaryPrincipal();
-        User user = userService.findUserByUsername(username);
-
-        SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
-        authorizationInfo.setRoles(roleService.findStringRolesByUser(user));
-        authorizationInfo.setStringPermissions(permissionService.findStringPermissionsByRoles());
-
-
-        return null;
+        }*/
+        ByteSource credentialsSalt = ByteSource.Util.bytes(user.getUsername() + user.getPasswordSalt());
+        System.out.println(getName());
+        return new SimpleAuthenticationInfo(user.getUsername(), user.getPassword(), credentialsSalt, "userRealm");
     }
 }

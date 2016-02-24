@@ -12,6 +12,6 @@ import java.util.List;
  */
 public interface RoleRepository extends CrudRepository<Role, Long> {
 
-    @Query(value = "from Role r inner join r.userList u where u in ?1")
+    @Query(value = "select r from Role r inner join r.userList u where u in ?1")
     public List<Role> findByUserList(List<User> userList);
 }

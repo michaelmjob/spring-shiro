@@ -2,6 +2,7 @@ package com.shawn.study.shiro.service;
 
 import com.shawn.study.shiro.entity.User;
 import com.shawn.study.shiro.repository.UserRepository;
+import com.shawn.study.shiro.security.PasswordHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,5 +16,9 @@ public class UserService {
 
     public User findUserByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    public void save(User user) {
+        userRepository.save(PasswordHelper.generatePassword(user));
     }
 }

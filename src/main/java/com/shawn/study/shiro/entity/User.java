@@ -2,6 +2,8 @@ package com.shawn.study.shiro.entity;
 
 import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -20,11 +22,16 @@ public class User implements Serializable {
 //    @GeneratedValue(generator = "uuid")
     private Long id;
 
+    @NaturalId
     @Column(name = "username")
+    @NotEmpty
     private String username;
 
     @Column(name = "password")
     private String password;
+
+    @Column(name = "password_salt")
+    private String passwordSalt;
 
     @Column(name = "locked")
     private Boolean locked;
@@ -80,6 +87,14 @@ public class User implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getPasswordSalt() {
+        return passwordSalt;
+    }
+
+    public void setPasswordSalt(String passwordSalt) {
+        this.passwordSalt = passwordSalt;
     }
 
     public Boolean getLocked() {

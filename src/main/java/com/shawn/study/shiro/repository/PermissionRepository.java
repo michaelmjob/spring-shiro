@@ -11,6 +11,6 @@ import java.util.List;
  * Created by Shawn on 2016/2/22.
  */
 public interface PermissionRepository extends CrudRepository<Permission, Long> {
-    @Query(value = "from Permission p INNER JOIN p.roleList r where r in ?1")
+    @Query(value = "select p from Permission p INNER JOIN p.roleList r where r in ?1")
     public List<Permission> findByRoleList(List<Role> roleList);
 }
